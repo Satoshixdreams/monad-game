@@ -21,5 +21,14 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['ethers', 'axios', 'react', 'react-dom']
+  },
+  resolve: {
+    alias: {
+      'react': 'react',
+      'react-dom': 'react-dom'
+    }
+  },
+  define: {
+    'process.env': process.env
   }
 });

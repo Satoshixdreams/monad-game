@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- حل مشكلة تعارض محافظ الإيثيريوم -->
+    <script src="/ethereum-fix.js"></script>
+    
+    <!-- تعريف React كمتغير عالمي -->
+    <script>
+        window.React = {
+            createElement: function() { return {}; },
+            Fragment: {},
+            version: '18.2.0'
+        };
+        window.react = window.React;
+        window.ReactDOM = {
+            createRoot: function() { return { render: function() {} }; }
+        };
+        window['react-dom'] = window.ReactDOM;
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة الداما التركية على شبكة Monad</title>
+    <title>لعبة الداما التركية على Monad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body, html, iframe {
             width: 100%;
@@ -16,6 +34,7 @@
     </style>
 </head>
 <body>
-    <iframe src="/index.html" id="gameFrame"></iframe>
+    <div id="root"></div>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>
