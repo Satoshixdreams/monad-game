@@ -7,14 +7,23 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: ["https://bitmon.site", "https://www.bitmon.site", "http://localhost:3000"],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 // لتخزين معلومات الغرف والمباريات
 const rooms = {};
 const players = {};
+
+// تقديم الملفات الثابتة
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// توجيه جميع طلبات HTTP إلى index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 io.on('connection', (socket) => {
   console.log(`لاعب جديد متصل: ${socket.id}`);
@@ -47,6 +56,8 @@ io.on('connection', (socket) => {
     // إرسال تأكيد إنشاء الغرفة
     socket.emit('roomCreated', { roomId, room: rooms[roomId] });
     io.emit('roomsList', getRoomsList());
+    
+    console.log(`لاعب بعنوان محفظة: ${walletAddress} انضم للغرفة`);
   });
   
   // الانضمام إلى غرفة موجودة
@@ -81,6 +92,8 @@ io.on('connection', (socket) => {
     // إخطار اللاعبين
     io.to(roomId).emit('playerJoined', { room });
     io.emit('roomsList', getRoomsList());
+    
+    console.log(`لاعب بعنوان محفظة: ${walletAddress} انضم للغرفة`);
   });
   
   // عندما يكون اللاعب جاهزاً
@@ -257,6 +270,12 @@ function checkGameOver(gameState) {
   // نسخة مبسطة للتحقق من انتهاء اللعبة
   return gameState.player1PiecesCount === 0 || gameState.player2PiecesCount === 0;
 }
+
+// معالجة الأخطاء العامة
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('حدث خطأ في الخادم!');
+});
 
 // تشغيل الخادم
 const PORT = process.env.PORT || 3002;
