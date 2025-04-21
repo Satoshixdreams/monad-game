@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://bitmon.site", "https://www.bitmon.site", "http://localhost:3007"],
+    origin: ["https://bitmon.site", "https://www.bitmon.site", "http://localhost:3002"],
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -278,7 +278,7 @@ app.use((err, req, res, next) => {
 });
 
 // تشغيل الخادم
-const PORT = process.env.PORT || 3007;
+const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
   console.log(`الخادم يعمل على المنفذ ${PORT}`);
 }); 
