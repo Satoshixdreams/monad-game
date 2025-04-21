@@ -278,7 +278,7 @@ app.use((err, req, res, next) => {
 });
 
 // تشغيل الخادم
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3007;
 server.listen(PORT, () => {
   console.log(`الخادم يعمل على المنفذ ${PORT}`);
 }); 
