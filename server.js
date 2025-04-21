@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://bitmon.site", "https://www.bitmon.site", "http://localhost:3000"],
+    origin: ["https://bitmon.site", "https://www.bitmon.site", "http://localhost:3007"],
     methods: ["GET", "POST"],
     credentials: true
   }
