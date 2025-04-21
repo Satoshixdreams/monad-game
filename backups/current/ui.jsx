@@ -69,8 +69,8 @@ function App() {
             const newSocket = io('http://localhost:3002');
             
             newSocket.on('connect', () => {
-                console.log('Connected to server');
-                setStatusMessage('Connected to online game server');
+                console.log('متصل بالخادم');
+                setStatusMessage('تم الاتصال بخادم اللعب عبر الإنترنت');
             });
             
             newSocket.on('roomsList', (rooms) => {
@@ -80,21 +80,22 @@ function App() {
             newSocket.on('roomCreated', ({ roomId, room }) => {
                 setCurrentRoom(room);
                 setOnlineStatus('room');
-                setStatusMessage(`Room created: ${room.name}`);
+                setStatusMessage(`تم إنشاء الغرفة: ${room.name}`);
             });
             
             newSocket.on('playerJoined', ({ room }) => {
                 setCurrentRoom(room);
-                setStatusMessage(`New player joined: ${room.players[room.players.length-1].name}`);
+                setStatusMessage(`انضم لاعب جديد: ${room.players[room.players.length-1].name}`);
             });
             
             newSocket.on('playerStatusUpdate', ({ room }) => {
                 setCurrentRoom(room);
                 const readyPlayers = room.players.filter(p => p.ready).length;
-                setStatusMessage(`${readyPlayers} of ${room.players.length} players ready`);
+                setStatusMessage(`${readyPlayers} من ${room.players.length} لاعبين جاهزين`);
             });
             
             newSocket.on('gameStart', ({ gameState }) => {
+                // تحديث حالة اللعبة بما تلقيناه من الخادم
                 setGameState({
                     board: gameState.board,
                     currentPlayer: gameState.currentPlayer,
@@ -102,10 +103,11 @@ function App() {
                     player2PiecesCount: gameState.player2PiecesCount,
                     gameOver: gameState.gameOver
                 });
-                setStatusMessage(`Game started! Player ${gameState.currentPlayer}'s turn`);
+                setStatusMessage(`بدأت اللعبة! دور اللاعب ${gameState.currentPlayer}`);
             });
             
             newSocket.on('gameStateUpdate', ({ gameState }) => {
+                // تحديث حالة اللعبة من الخادم
                 setGameState({
                     board: gameState.board,
                     currentPlayer: gameState.currentPlayer,
@@ -113,10 +115,11 @@ function App() {
                     player2PiecesCount: gameState.player2PiecesCount,
                     gameOver: gameState.gameOver
                 });
-                setStatusMessage(`Player ${gameState.currentPlayer}'s turn`);
+                setStatusMessage(`دور اللاعب ${gameState.currentPlayer}`);
             });
             
             newSocket.on('gameOver', ({ winner, gameState }) => {
+                // انتهاء اللعبة
                 showWinMessage(winner);
                 setGameState(prev => ({ ...prev, gameOver: true }));
             });
@@ -124,7 +127,7 @@ function App() {
             newSocket.on('playerLeft', ({ room }) => {
                 setCurrentRoom(room);
                 if (room.players.length < 2) {
-                    setStatusMessage('Other player left the game');
+                    setStatusMessage('غادر اللاعب الآخر اللعبة');
                 }
             });
             
@@ -196,7 +199,7 @@ function App() {
             player2PiecesCount: 12,
             gameOver: false
         });
-        setStatusMessage('Player 1\'s turn');
+        setStatusMessage('دور اللاعب 1');
         setSelectedPiece(null);
         setValidMoves([]);
     };
@@ -204,7 +207,7 @@ function App() {
     // وظائف إدارة الغرف
     const createRoom = (roomName) => {
         if (!socket || !walletConnected) {
-            setStatusMessage('You must connect your wallet first to play online');
+            setStatusMessage('يجب ربط المحفظة أولاً للعب عبر الإنترنت');
             return;
         }
         
@@ -217,7 +220,7 @@ function App() {
     
     const joinRoom = (roomId) => {
         if (!socket || !walletConnected) {
-            setStatusMessage('You must connect your wallet first to play online');
+            setStatusMessage('يجب ربط المحفظة أولاً للعب عبر الإنترنت');
             return;
         }
         
@@ -234,7 +237,7 @@ function App() {
         if (!socket || !currentRoom) return;
         
         socket.emit('playerReady');
-        setStatusMessage('You are ready! Waiting for other player...');
+        setStatusMessage('أنت جاهز للعب! بانتظار اللاعب الآخر...');
     };
     
     const sendMove = (fromRow, fromCol, toRow, toCol) => {
@@ -252,7 +255,7 @@ function App() {
         }
         
         if (getPlayer(gameState.board[row][col]) !== gameState.currentPlayer) {
-            setStatusMessage(`Player ${gameState.currentPlayer}'s turn`);
+            setStatusMessage(`دور اللاعب ${gameState.currentPlayer}`);
             return;
         }
         
@@ -265,20 +268,20 @@ function App() {
         
         if (mandatoryPieces.length > 0 && 
             !mandatoryPieces.some(([r, c]) => r === row && c === col)) {
-            setStatusMessage('You must make the mandatory capture');
+            setStatusMessage('يجب تنفيذ الضربة الإجبارية');
             return;
         }
         
         if (selectedPiece?.row === row && selectedPiece?.col === col) {
             setSelectedPiece(null);
             setValidMoves([]);
-            setStatusMessage(`Player ${gameState.currentPlayer}'s turn`);
+            setStatusMessage(`دور اللاعب ${gameState.currentPlayer}`);
         } else if (pieceValidMoves.length > 0) {
             setValidMoves(pieceValidMoves);
             setSelectedPiece({ row, col });
-            setStatusMessage('Select a square to move to');
+            setStatusMessage('اختر المربع للتحرك إليه');
         } else {
-            setStatusMessage('No valid moves for this piece');
+            setStatusMessage('لا توجد حركات متاحة لهذه القطعة');
         }
     };
 
@@ -347,7 +350,7 @@ function App() {
             player2PiecesCount: player2Count
         }));
         
-        setStatusMessage(`Player ${nextPlayer}'s turn`);
+        setStatusMessage(`دور اللاعب ${nextPlayer}`);
         
         if (player1Count === 0 || player2Count === 0) {
             await showWinMessage(getOpponent(gameState.currentPlayer));
@@ -366,7 +369,7 @@ function App() {
             const reward = 10;
             const rewardResult = await rewardPlayer(reward);
             
-            setStatusMessage(`Player ${winner} wins!`);
+            setStatusMessage(`الفائز هو اللاعب ${winner}!`);
             
             if (rewardResult.success) {
                 setBtmBalance(`${rewardResult.balance} BTM`);
@@ -375,19 +378,19 @@ function App() {
                 if (rewardResult.message) {
                     setStatusMessage(prev => `${prev} ${rewardResult.message}`);
                 } else {
-                    setStatusMessage(prev => `${prev} Sent ${reward} BTM as reward!`);
+                    setStatusMessage(prev => `${prev} تم إرسال ${reward} BTM كمكافأة!`);
                 }
             } else {
                 // Display custom error message if available
                 if (rewardResult.message) {
                     setStatusMessage(prev => `${prev} ${rewardResult.message}`);
                 } else {
-                    setStatusMessage(prev => `${prev} Failed to send reward. Please check your wallet connection.`);
+                    setStatusMessage(prev => `${prev} فشل إرسال المكافأة. يرجى التأكد من اتصال المحفظة.`);
                 }
             }
         } catch (error) {
-            console.error('Error sending reward:', error);
-            setStatusMessage(prev => `${prev} An error occurred while sending the reward`);
+            console.error('خطأ في إرسال المكافأة:', error);
+            setStatusMessage(prev => `${prev} حدث خطأ أثناء إرسال المكافأة`);
         }
     };
 
@@ -398,11 +401,11 @@ function App() {
                 setWalletConnected(false);
                 setWalletAddress('');
                 setBtmBalance('');
-                setStatusMessage('Wallet disconnected');
+                setStatusMessage('تم فصل المحفظة');
             }
         } else {
             try {
-                setStatusMessage('Connecting to wallet...');
+                setStatusMessage('جاري الاتصال بالمحفظة...');
                 const result = await connectWallet();
                 
                 if (result.success) {
@@ -413,19 +416,19 @@ function App() {
                     const formattedBalance = parseFloat(result.balance).toFixed(4);
                     setBtmBalance(formattedBalance);
                     
-                    setStatusMessage(`Successfully connected to wallet! Balance: ${formattedBalance} BTM`);
+                    setStatusMessage(`تم الاتصال بالمحفظة بنجاح! الرصيد: ${formattedBalance} BTM`);
                     
                     // Check if we're on Monad testnet
                     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
                     if (chainId !== '0x279f') { // 0x279f is 10143 in hex
-                        setStatusMessage('Please switch to Monad Testnet');
+                        setStatusMessage('يرجى التبديل إلى شبكة Monad Testnet');
                     }
                 } else {
-                    setStatusMessage('Failed to connect wallet');
+                    setStatusMessage('فشل الاتصال بالمحفظة');
                 }
             } catch (error) {
                 console.error('Failed to connect wallet:', error);
-                setStatusMessage(`Failed to connect wallet: ${error.message}`);
+                setStatusMessage(`فشل الاتصال بالمحفظة: ${error.message}`);
             }
         }
     };
@@ -436,7 +439,7 @@ function App() {
         
         if (!walletConnected) {
             // Show alert if not connected
-            alert('Please connect your wallet to participate in chat');
+            alert('يرجى ربط المحفظة للمشاركة في الدردشة');
             return;
         }
 
@@ -444,7 +447,7 @@ function App() {
         const newMessage = {
             id: Date.now(),
             text: currentMessage,
-            sender: walletAddress ? (walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4)) : 'Guest',
+            sender: walletAddress ? (walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4)) : 'زائر',
             timestamp: new Date().toLocaleTimeString()
         };
 
@@ -454,23 +457,23 @@ function App() {
         // Clear input
         setCurrentMessage('');
         
-        // In online mode, we could send the message to the server to distribute to players
+        // في وضع اللعب عبر الإنترنت، يمكن إرسال الرسالة للخادم لتوزيعها على اللاعبين
         if (gameMode === 'online' && socket && currentRoom) {
             // socket.emit('chatMessage', { roomId: currentRoom.id, message: newMessage });
         } else {
             // Mock response from other player after 1-3 seconds
             if (chatMessages.length < 10 && Math.random() > 0.3) {
                 const responses = [
-                    'Well done! That was a good move',
-                    'Hello, are you ready to play?',
-                    'Great game!',
-                    'I am really enjoying this game',
-                    'Do you know any good strategy?',
-                    'I have been playing for years',
-                    'This time I will win!',
-                    'I need to pay more attention',
-                    'Good luck to you',
-                    'Have you played Turkish Checkers before?'
+                    'أحسنت! هذه حركة جيدة',
+                    'مرحباً، هل أنت جاهز للعب؟',
+                    'لعبة ممتازة!',
+                    'أنا أستمتع بهذه اللعبة كثيراً',
+                    'هل تعرف استراتيجية جيدة؟',
+                    'أنا لاعب منذ سنوات',
+                    'هذه المرة سأفوز!',
+                    'يجب أن ألعب بانتباه أكثر',
+                    'أتمنى لك التوفيق',
+                    'هل لعبت الدامة التركية من قبل؟'
                 ];
                 
                 setTimeout(() => {
@@ -491,8 +494,8 @@ function App() {
         if (chatMessages.length === 0) {
             setChatMessages([{
                 id: Date.now(),
-                text: 'Welcome to the chat room! You can communicate with the other player here. Connect your wallet to participate.',
-                sender: 'System',
+                text: 'مرحباً بك في غرفة الدردشة! يمكنك التواصل مع اللاعب الآخر هنا. قم بربط المحفظة للمشاركة.',
+                sender: 'النظام',
                 timestamp: new Date().toLocaleTimeString(),
                 isSystem: true
             }]);
@@ -507,36 +510,36 @@ function App() {
     // عرض واجهة قائمة الغرف
     const renderRoomsList = () => (
         <div className="rooms-list">
-            <h3>Available Rooms</h3>
+            <h3>الغرف المتاحة</h3>
             {roomsList.length === 0 ? (
-                <p>No rooms available at the moment</p>
+                <p>لا توجد غرف متاحة حالياً</p>
             ) : (
                 <ul>
                     {roomsList.map(room => (
                         <li key={room.id}>
                             {room.name} ({room.players}/2)
-                            <button onClick={() => joinRoom(room.id)}>Join</button>
+                            <button onClick={() => joinRoom(room.id)}>انضمام</button>
                         </li>
                     ))}
                 </ul>
             )}
-            <button onClick={() => setOnlineStatus('create')}>Create Room</button>
-            <button onClick={() => setGameMode('pvp')}>Back to Local Play</button>
+            <button onClick={() => setOnlineStatus('create')}>إنشاء غرفة</button>
+            <button onClick={() => setGameMode('pvp')}>العودة للعب المحلي</button>
         </div>
     );
     
     // عرض واجهة إنشاء غرفة جديدة
     const renderCreateRoom = () => (
         <div className="create-room">
-            <h3>Create New Room</h3>
+            <h3>إنشاء غرفة جديدة</h3>
             <input
                 type="text"
-                placeholder="Room Name"
+                placeholder="اسم الغرفة"
                 value={roomName}
                 onChange={e => setRoomName(e.target.value)}
             />
-            <button onClick={() => createRoom(roomName)}>Create</button>
-            <button onClick={() => setOnlineStatus('browse')}>Back</button>
+            <button onClick={() => createRoom(roomName)}>إنشاء</button>
+            <button onClick={() => setOnlineStatus('browse')}>عودة</button>
         </div>
     );
     
@@ -549,26 +552,26 @@ function App() {
         
         return (
             <div className="game-room">
-                <h3>Room: {currentRoom.name}</h3>
+                <h3>غرفة: {currentRoom.name}</h3>
                 <div className="players-info">
                     <div className="player-info">
-                        <p>You: {currentPlayer?.name}</p>
-                        <p>Color: {currentPlayer?.color === 1 ? 'Red' : 'Blue'}</p>
-                        <p>Status: {currentPlayer?.ready ? 'Ready' : 'Not Ready'}</p>
+                        <p>أنت: {currentPlayer?.name}</p>
+                        <p>اللون: {currentPlayer?.color === 1 ? 'أحمر' : 'أزرق'}</p>
+                        <p>الحالة: {currentPlayer?.ready ? 'جاهز' : 'غير جاهز'}</p>
                         {!currentPlayer?.ready && (
-                            <button onClick={setPlayerReady}>Ready to Play</button>
+                            <button onClick={setPlayerReady}>جاهز للعب</button>
                         )}
                     </div>
                     
                     {otherPlayer ? (
                         <div className="player-info">
-                            <p>Opponent: {otherPlayer.name}</p>
-                            <p>Color: {otherPlayer.color === 1 ? 'Red' : 'Blue'}</p>
-                            <p>Status: {otherPlayer.ready ? 'Ready' : 'Not Ready'}</p>
+                            <p>الخصم: {otherPlayer.name}</p>
+                            <p>اللون: {otherPlayer.color === 1 ? 'أحمر' : 'أزرق'}</p>
+                            <p>الحالة: {otherPlayer.ready ? 'جاهز' : 'غير جاهز'}</p>
                         </div>
                     ) : (
                         <div className="player-info">
-                            <p>Waiting for another player...</p>
+                            <p>بانتظار لاعب آخر...</p>
                         </div>
                     )}
                 </div>
@@ -577,7 +580,7 @@ function App() {
                     socket.emit('leaveRoom');
                     setCurrentRoom(null);
                     setOnlineStatus('browse');
-                }}>Leave Room</button>
+                }}>مغادرة الغرفة</button>
             </div>
         );
     };
@@ -587,7 +590,7 @@ function App() {
         <div className="game-info">
             <div className="status-area">{statusMessage}</div>
             <div className="pieces-count-area">
-                Player 1: {gameState.player1PiecesCount} | Player 2: {gameState.player2PiecesCount}
+                اللاعب 1: {gameState.player1PiecesCount} | اللاعب 2: {gameState.player2PiecesCount}
             </div>
         </div>
     );
@@ -599,12 +602,12 @@ function App() {
                     className="connect-wallet"
                     onClick={handleConnectWallet}
                 >
-                    {walletConnected ? 'Disconnect Wallet' : 'Connect Wallet'}
+                    {walletConnected ? 'فصل المحفظة' : 'ربط المحفظة'}
                 </button>
                 {walletConnected && (
                     <>
-                        <span className="wallet-address">Address: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-                        <span className="token-balance">BTM Balance: {btmBalance}</span>
+                        <span className="wallet-address">العنوان: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+                        <span className="token-balance">رصيد BTM: {btmBalance}</span>
                     </>
                 )}
             </div>
@@ -612,7 +615,7 @@ function App() {
             {/* إضافة اختيار وضع اللعب */}
             <div className="game-setup">
                 <div className="mode-selection">
-                    <label>Game Mode:</label>
+                    <label>وضع اللعب:</label>
                     <select 
                         value={gameMode} 
                         onChange={(e) => {
@@ -624,9 +627,9 @@ function App() {
                             }
                         }}
                     >
-                        <option value="pvp">Player vs Player (Local)</option>
-                        <option value="pvc">Player vs Smart AI</option>
-                        <option value="online">Online Multiplayer</option>
+                        <option value="pvp">لاعب ضد لاعب محلي</option>
+                        <option value="pvc">لاعب ضد Smart AI</option>
+                        <option value="online">لعب عبر الإنترنت</option>
                     </select>
                 </div>
             </div>
@@ -679,7 +682,7 @@ function App() {
                         
                         <div className="game-controls">
                             {gameMode !== 'online' && (
-                                <button className="connect-wallet" onClick={startNewGame}>New Game</button>
+                                <button className="connect-wallet" onClick={startNewGame}>لعبة جديدة</button>
                             )}
                         </div>
                     </div>
@@ -691,14 +694,14 @@ function App() {
                         className="chat-toggle"
                         onClick={toggleChat}
                     >
-                        {showChat ? 'Hide Chat' : 'Show Chat'}
+                        {showChat ? 'إخفاء الدردشة' : 'إظهار الدردشة'}
                     </button>
                     
                     {showChat && (
                         <div className="chat-container">
                             <div className="chat-messages">
                                 {chatMessages.length === 0 ? (
-                                    <div className="no-messages">No messages. Start the conversation!</div>
+                                    <div className="no-messages">لا توجد رسائل. ابدأ المحادثة!</div>
                                 ) : (
                                     chatMessages.map(msg => (
                                         <div 
@@ -718,7 +721,7 @@ function App() {
                                     type="text"
                                     value={currentMessage}
                                     onChange={e => setCurrentMessage(e.target.value)}
-                                    placeholder={walletConnected ? "Type your message here..." : "Connect your wallet to participate in chat"}
+                                    placeholder={walletConnected ? "اكتب رسالتك هنا..." : "قم بربط المحفظة للمشاركة في الدردشة"}
                                     disabled={!walletConnected}
                                 />
                                 <button 
@@ -726,7 +729,7 @@ function App() {
                                     className={`send-button ${!walletConnected ? 'disabled' : ''}`}
                                     disabled={!walletConnected}
                                 >
-                                    Send
+                                    إرسال
                                 </button>
                             </form>
                         </div>

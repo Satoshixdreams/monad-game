@@ -6,11 +6,9 @@ let signer = null;
 let connectedAddress = null;
 let btmBalanceValue = '';
 
-// Monad Testnet Configuration - Network ID: 10143
 const MONAD_CHAIN_ID = 10143;
 const MONAD_CHAIN_ID_HEX = '0x' + MONAD_CHAIN_ID.toString(16);
 
-// Monad Testnet Configuration
 const MONAD_PARAMS = {
     chainId: MONAD_CHAIN_ID_HEX,
     chainName: 'Monad Testnet',

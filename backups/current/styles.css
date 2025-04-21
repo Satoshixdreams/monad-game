@@ -279,7 +279,7 @@ h1 {
 }
 
 .square {
-    border: 1.5px solid #444;
+    border: 1px solid var(--medium-bg);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -513,7 +513,7 @@ button:hover, select:hover, .connect-wallet:hover {
     }
 }
 
-/* Room System Styles */
+/* أنماط نظام الغرف */
 .rooms-list {
     background-color: var(--medium-bg);
     border-radius: 0.5rem;
@@ -638,7 +638,7 @@ button:hover, select:hover, .connect-wallet:hover {
     font-size: 0.9rem;
 }
 
-/* Ready to Play Button */
+/* زر جاهز للعب */
 .player-info button {
     display: block;
     width: 100%;
@@ -676,7 +676,7 @@ button:hover, select:hover, .connect-wallet:hover {
     min-width: 200px;
 }
 
-/* Online Game Mode Adjustments */
+/* تعديلات لوضع اللعب عبر الإنترنت */
 @media (max-width: 900px) {
     .player-info {
         width: 100%;
@@ -686,40 +686,4 @@ button:hover, select:hover, .connect-wallet:hover {
     .players-info {
         flex-direction: column;
     }
-}
-
-/* Monad Integration Styles */
-.monad-integration {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 8px 12px;
-    border-radius: 20px;
-    z-index: 1000;
-    font-size: 0.9rem;
-}
-
-.monad-logo {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: #8a56ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: white;
-}
-
-.testnet-badge {
-    background-color: #8a56ff;
-    color: white;
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
 }
