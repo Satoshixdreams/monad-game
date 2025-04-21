@@ -1,0 +1,3 @@
+@echo off
+echo Starting Monad Game Server on port 3002...
+node server.js 

@@ -1,0 +1,3 @@
+@echo off
+echo Starting Development Server on port 3001...
+node server.js 
